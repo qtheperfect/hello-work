@@ -40,9 +40,11 @@ for iter = 1:10000
     (dW1, dW2) = train1c(xs,yT,W1,W2);
     ddW1 = ddW1+dW1;
     ddW2 = ddW2+dW2;
+    # PD controller:
     W1 = W1+alpha*(0.3*ddW1+0.7*dW1);
     W2 = W2+alpha*(0.3*ddW2+0.7*dW2);
-#    alpha = alpha/(1+alpha);
+    # /alpha_n = frac{1}{n}:
+    alpha = alpha/(1+alpha); 
     ass[1][:set_ydata](netout(xs,W1,W2));
     ms[1][:set_xdata](-W1[2,:]);
     plt[:show]();
