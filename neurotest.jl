@@ -43,7 +43,7 @@ for iter = 1:10000
     # PD controller:
     W1 = W1+alpha*(0.3*ddW1+0.7*dW1);
     W2 = W2+alpha*(0.3*ddW2+0.7*dW2);
-    # /alpha_n = frac{1}{n}:
+    # /alpha_n = /frac{1}{n}:
     alpha = alpha/(1+alpha); 
     ass[1][:set_ydata](netout(xs,W1,W2));
     ms[1][:set_xdata](-W1[2,:]);
