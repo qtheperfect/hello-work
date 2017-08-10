@@ -50,7 +50,7 @@ for iter = 1:10000
     plt[:show]();
     title("Iteration at $iter")
     println(mean(abs.(yT-netout(xs,W1,W2))));
-    sleep(0.02);
+    sleep(0.001);
 end
 
     
