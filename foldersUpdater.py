@@ -1,7 +1,7 @@
 # Search all files in two folders with md5 check and update one to the other
 
 # (setq python-shell-interpreter "python3")
-# ... because python3 maks you learn chinese good.
+
 
 import os
 import hashlib
