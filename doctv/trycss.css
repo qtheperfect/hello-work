@@ -77,3 +77,13 @@
     width:100%;
     min-height:100vh;
 }
+
+.notify {
+    position:absolute;
+    z-index:100;
+    bottom:0px;
+    right:0px;
+    min-height:50px;
+    min-width:100px;
+}
+    

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-	<title> Comic Reader Inside Browser With Raw Javascript </title>
+	<title> A advanced document reader  </title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="trycss.css" type="text/css"/>
 	<script>
@@ -38,19 +38,26 @@
 	     
 	     lens = document.createElement("DIV");
 	     lens.setAttribute("class", "img-zoom-lens");
-	     rerec = result.parentNode.getBoundingClientRect();
-	     imrec = img.getBoundingClientRect();
-	     img.parentElement.insertBefore(lens, img);
-	     
-	     lensPosition = {
-		 x:0,
-		 y:0,
-		 w:rerec.width / howLarge,
-		 h:rerec.height / howLarge,
-		 l : howLarge,
-		 xMax:imrec.width,
-		 yMax:imrec.height	     
+
+
+	     var lensPosition;
+
+	     function blinkLens() {
+		 rerec = result.parentNode.getBoundingClientRect();
+		 imrec = img.getBoundingClientRect();
+		 img.parentElement.insertBefore(lens, img);
+		 lensPosition = {
+		     x:0,
+		     y:0,
+		     w:rerec.width / howLarge,
+		     h:rerec.height / howLarge,
+		     l : howLarge,
+		     xMax:imrec.width,
+		     yMax:imrec.height	     
+		 }
+		 return lensPosition;
 	     }
+	     blinkLens();
 	     //lens.style.width = rerec.width / howLarge + "px";
 	     //lens.style.height = rerec.height  / howLarge + "px";
 	     //verbose.innerHTML= result.getBoundingClientRect().height;
@@ -77,6 +84,7 @@
 	     /*and also for touch screens:*/
 	     lens.addEventListener("touchmove", moveLens);
 	     img.addEventListener("touchmove", moveLens);
+	     // note: window.addEventListener facilitates onload action.
 	     
 	     function moveLens(e) {
 		 var pos, x, y;
@@ -91,7 +99,7 @@
 		 lensPosition.y = y
 		 lensPosition = betterLens()
 		 /*prevent the lens from being positioned outside the image:*/
-		 verbose.innerHTML = JSON.stringify(lensPosition);
+		 //		 verbose.innerHTML = JSON.stringify(lensPosition);
 		 putLens()
 		 followLens()
 
@@ -112,21 +120,15 @@
 		 return {x : x, y : y};
 	     }
 
-	     function getLensPos(){
-		 lensRec = lens.getBoundingClientRect();
-		 imgRec = img.getBoundingClientRect();
-		 x = lensRec.left - imgRec.left;
-		 y = lensRec.top - imgRec.top;
-		 w = lensRec.width;
-		 h = lensRec.height;
-		 return {x:x, y:y, w:w, h:h, l:howLarge};
-	     }
 
 	     function translateKey(e){
+		 // note: preventDefault to prevent default.
 		 e.preventDefault();
 		 console.log( e.keyCode );
 		 keyDict[e.keyCode]();
 	     }
+
+	     
 	     
 	     keyDict = new Array();
 	     /* // right hand main mode:
@@ -143,34 +145,71 @@
 		keyDict[59] = killHistory; */
 	     
 	     // Left-hand main mode:
+	     toRepeatKey = 67;
+	     
 	     keyDict[88] = function(){resetScale( howLarge * 0.9765625 ) ; };
-	     keyDict[67] = function(){resetScale( howLarge * 1.024 );};
+	     keyDict[90] = function(){resetScale( howLarge * 1.024 );};
 	     keyDict[22] = stepLens;
 	     keyDict[70] = lowerLens;
 	     keyDict[68] = higherLens;
 	     keyDict[83] = lefterLens;
 	     keyDict[71] = righterLens;
 	     keyDict[220] = startStopBetter;
-	     keyDict[74] = addBetter;
+	     keyDict[49] = addBetter;
 	     keyDict[32] = followBetterForward;
 	     keyDict[81] = killHistory;
-	     keyDict[66] = brutalSwitch;
+	     keyDict[66] = browseSwitch;
+	     keyDict[toRepeatKey] = toRepeat;
 
-	     brutalMove = 5;
-	     function brutalSwitch(){
-		 if (brutalMove == 1){
-		     brutalMove = 5;
+	     var keyRepeatTimes = 1;
+	     function makeRepeatPossible(times = keyRepeatTimes * 5){
+		 if (typeof(noter) != "undefined"){
+		     noter.remove()
+		 }
+		 noter = document.createElement("button");
+		 noter.innerHTML = "Repeat time: " + times;
+		 noter.setAttribute("class", "notify");
+		 noter.addEventListener("keydown", repeatSlavor);
+		 noter.addEventListener("click", noter.remove);
+
+		 function repeatSlavor(e){
+		     if (e.keyCode == toRepeatKey){
+			 return;
+		     }
+		     keyRepeatTimes = 1;
+		     noter.remove();
+
+		     for (i=0; i<times; i++){
+			 keyDict[e.keyCode]()
+		     }
+		 }
+		 document.body.appendChild(noter);
+		 noter.focus();
+	     }
+
+	     function toRepeat(e){
+		 makeRepeatPossible()
+		 keyRepeatTimes = keyRepeatTimes + 1;
+	     }
+
+
+	     
+	     var browsePace = 10;
+	     function browseSwitch(){
+		 if (browsePace == 1){
+		     browsePace = 10;
 		 }
 		 else{
-		     brutalMove = 1;
+		     browsePace = 1;
 		 }
 	     }
+	     
 	     function lowerLens(){
 		 imgRec = img.getBoundingClientRect();
 		 lensPosition.yMax = imgRec.height;
 		 
 		 if (lensPosition.y < lensPosition.yMax - lensPosition.h ){
-		     lensPosition.y = lensPosition.y + lensPosition.h * 0.12
+		     lensPosition.y = lensPosition.y + lensPosition.h * 0.024 * browsePace 
 		 }
 		 putLens();
 		 followLens();
@@ -181,7 +220,7 @@
 		 lensPosition.yMax = imgRec.height;
 		 
 		 if (lensPosition.y > 0){
-		     lensPosition.y = lensPosition.y - lensPosition.h * 0.12;
+		     lensPosition.y = lensPosition.y - lensPosition.h * 0.024 * browsePace ;
 		 }
 		 putLens();
 		 followLens()
@@ -192,7 +231,7 @@
 		 //		 lensRec = lens.getBoundingClientRect();
 		 lensPosition.xMax = imgRec.width;
 		 if (lensPosition.x > 0){
-		     lensPosition.x = lensPosition.x - lensPosition.w * 0.12;
+		     lensPosition.x = lensPosition.x - lensPosition.w * 0.024 * browsePace ;
 		 }
 		 putLens()
 		 followLens()
@@ -203,7 +242,7 @@
 		 //		 lensRec = lens.getBoundingClientRect();
 		 lensPosition.xMax = imgRec.width;
 		 if (lensPosition.x + lensPosition.w < lensPosition.xMax){
-		     lensPosition.x = lensPosition.x  + lensPosition.w * 0.12
+		     lensPosition.x = lensPosition.x  + lensPosition.w * 0.024 * browsePace 
 		 }
 		 putLens()
 		 followLens()
@@ -302,6 +341,7 @@
 		     betterLensList.length = 0;
 		     betterPicking = true;
 		 }
+		 
 	     }
 	     
 	     function addBetter() {
@@ -313,7 +353,7 @@
 	     }
 	     
 	     function followBetterForward(){
-		 verbose.innerHTML = "page " + betterCurrent;
+		 verbose.innerHTML = "sect: " + betterCurrent;
 		 l = betterLensList.length;
 		 if (l <= 0) {
 		     return 0
@@ -335,7 +375,10 @@
 	     yPace = 0.6;
 	     xPace = 0.8;
 	     
-	     function nextPage(){return img;}
+	     function nextPage(){
+		 result.style.backgroundImage = "url('" + img.src + "')";
+		 resetScale(howLarge);
+	     }
 	     function stepLens( ){
 		 // Some steps can be simplified using function getLensPos() ...
 		 
@@ -355,7 +398,7 @@
 			 xp = lw * xPace;
 			 x = x + xp;
 			 if (x >= imgRec.width + xp - lw ) {
-			     img = nextPage()
+			     nextPage()
 			     x = 0;}
 		     }
 		     return {x:x, y:y}
@@ -371,7 +414,11 @@
 		 putAllHistory();		 
 	     }
 	     
-	     function prePage(){return img;}
+	     function prePage(){
+		 blinkLens();
+		 killHistory();
+		 return img;
+	     }
 	     function stepBackLens( ){
 		 lenRec = lens.getBoundingClientRect();
 		 imgRec = img.getBoundingClientRect();
