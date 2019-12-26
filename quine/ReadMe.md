@@ -1,2 +1,12 @@
-#The quine files that rocks
-As is informed.
+# The self-replicating quine scripts
+
+As is proposed.
+
+* 春風倚棹闔閭城
+* 水國春寒陰復晴
+* 細雨濕衣看不見
+* 閒花落地聽無聲
+* 日斜江上孤帆影
+* 草綠湖南萬里情
+* 東道若逢相識問
+* 青袍今已吳儒生
