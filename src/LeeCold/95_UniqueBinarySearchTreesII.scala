@@ -76,3 +76,39 @@ object Solution {
         
     }
 }
+
+
+
+
+object SolutionUgly {
+    def generateTrees(n: Int): List[TreeNode] = {
+        type TreeDict = Map[(Int, Int), List[TreeNode]]
+        
+        def rangeTrees(from: Int, to: Int, noBother: TreeDict): (List[TreeNode], TreeDict) = {
+            if (from > to) (List(null), noBother)
+            else if (from == to) (List(new TreeNode(from, null, null) ), noBother)
+            else if (noBother.contains((from, to))) {
+                (noBother((from, to)), noBother)
+            } 
+            else {
+                val (res, dicNew) = from.to(to).toList.foldLeft((List[TreeNode](), noBother))  {case ((res: List[TreeNode], dic: TreeDict), m) => { 
+                    val (allL, dic1) = rangeTrees(from, m - 1, dic)
+                
+                    val (allR, dic2) = rangeTrees(m + 1, to, dic1)
+                    val resNew = for {
+                        t1 <- allL 
+                        t2 <- allR 
+                    } yield { 
+                        new TreeNode(m, t1, t2) }
+                
+                    (res ++ resNew, dic2)
+                } } 
+                (res, dicNew.updated((from, to), res))
+            }
+            
+        }
+        if (n <= 0) Nil
+        else rangeTrees(1, n, Map[(Int, Int), List[TreeNode]]())._1
+        
+    }
+}
