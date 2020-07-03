@@ -1,4 +1,4 @@
-// Low-efficient low-security manual RSA algorithm test
+// Low-efficiency low-security manual RSA algorithm for test only
 // based on BigInt calculation in Scala.
 
 type BI = math.BigInt
