@@ -1,3 +1,5 @@
+
+
 module DataCSV
 # Use CSV files to store huge data
 # Where colomn :Data stores large data as Strings, while all other columns store keys.
@@ -14,7 +16,7 @@ struct CSVInfo
 end
 
 function CSVInfo(sample::Union{Dict, NamedTuple}, fileName::String)
-    keytypes = Dict([k => typeof(v) for (k, v) in sample])
+    keytypes = Dict([k => typeof(sample[k]) for k in keys(sample)])
     CSVInfo(
         collect(keys(sample)),
         merge(keytypes, Dict(:Data=> String)),
@@ -63,23 +65,37 @@ function goodRow(key::Union{Dict, NamedTuple}, row)
         return true
 end
 
-function  useRow(r)
+function useRow(r; nokeys = false)
     data=r[:Data]
     try
         data = eval(Meta.parse(r[:Data]))
     catch
         println("data as pure String!")
     end
-    keyDict = Dict([k => r[k] for k in keys(r) if k != :Data])
-    merge(keyDict, Dict(:Data => data))
+    if (nokeys)
+        data
+    else
+        keyDict = Dict([k => r[k] for k in keys(r) if k != :Data])
+        merge(keyDict, Dict(:Data => data))
+    end
 end
 
-function findRows(key::Dict, rows)
-        [useRow(r) for r in rows if goodRow(key, r)]
+function findRows(key::Dict, rows; iter = false, nokeys = true)
+    gen = (useRow(r; nokeys = nokeys) for r in rows if goodRow(key, r))
+    if (iter)
+        Iterators.Stateful(gen)
+    else
+        collect(gen)
+    end
 end
 
-function findRows(f::Function, rows)
-   [useRow(r) for r in rows if f(r)]
+function findRows(f::Function, rows; iter = false, nokeys = true)
+    gen = (useRow(r, nokeys = nokeys) for r in rows if f(r))
+    if (iter)
+        Iterators.Stateful( gen )
+    else 
+        collect(gen)
+    end
 end
 
 function keyExists(keys::Union{Dict, NamedTuple}, rows)
@@ -102,13 +118,17 @@ function getKeyChecker(info)
 end
 
 end # end module
+                                        
 
-using .DataCSV
-using DataFrames
+          
+ # ======================use-like-this======================>
 
-DC = DataCSV
+                                        
+# using .DataCSV
+# using DataFrames
 
-# ======================use-like-this======================>
+# DC = DataCSV
+
 
 # sample=Dict(
 #         :x => 3,
