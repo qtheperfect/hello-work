@@ -6,10 +6,10 @@
 	       ((file-directory-p (concat default-directory  "\.gnupg")) (concat default-directory  "/.gnupg"))
 	       ((file-directory-p (concat (dired-get-file-for-visit) "/.gnupg")) (concat (dired-get-file-for-visit) "/.gnupg"))
 	       (1 nil))))
-    (if nm
-	    (and (shell-command "gpgconf --kill all")
-	     (setq epg-gpg-home-directory nm))
-      (nil))))
+    (and nm
+	(shell-command "gpgconf --kill all")
+	(setq epg-gpg-home-directory nm))
+  ))
 
 
 (defvar epa-pinentry-mode)
