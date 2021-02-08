@@ -8,6 +8,7 @@
 	       (1 nil))))
     (and nm
 	(shell-command "gpgconf --kill all")
+	(setenv "GNUPGHOME" nm)
 	(setq epg-gpg-home-directory nm))
   ))
 
