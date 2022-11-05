@@ -19,6 +19,10 @@ server.on("request", (req, res) => {
     var reqList = req.url.split("/").filter(s => s.length > 0).filter(s => s != "ip-checkin")
     // 若是 nginx 转发，应有此种 header； 否则，源地址在 req.socket 中。
     var uip = req.headers["x-real-ip"] || req.socket.remoteAddress 
+    if (req.headers["x-forwarded-for"]) {
+        uip = req.headers["x-forwarded-for"].split(",")[0];
+    }
+
     if (reqList.lastIndexOf("update") > 0) {
 	var user = reqList[0]
 	fs.writeFile( "./ips/" + user + ".txt", uip, "utf-8", (e) => console.log("update: ", user, uip, e))
