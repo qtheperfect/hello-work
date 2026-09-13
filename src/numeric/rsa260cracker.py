@@ -34,12 +34,14 @@ def findPrime(init = 1000):
         init = init + 4
     return init
 
-p1 = findPrime(100000)
-p2 = findPrime(p1 + 1)
+primeBase = 5122342134123
+p1 = findPrime(primeBase)
+p2 = findPrime(p1 + primeBase)
 ntest = p1 * p2
 
 attemptCount = 0
 def rho(n: int, c: int, x0: int) -> int:
+    " The Pollard-Rho factorization with map x -> x^2+c mod n with x_0 = x0"
     x = x0
     y = x0
     while True:
@@ -68,12 +70,15 @@ def test():
 result = 1
 def run():
     global result
+    print(f"  Defactorizing the rsa260({rsa260}) via the rho algorithm\n")
+    
     result = rho(rsa260, 512341, 5121)
     print(f"\n    Factor of {rsa260} is:\n {result}")
     return result
 
 def verify():
     prd = rf1 * rf2
+    print(f"  Verifying the rsa260({rsa260}) with the published result\n")
     print(f"""
     rsa260  = {rsa260}
     factor1 = {rf1}
@@ -84,19 +89,25 @@ def verify():
     
     
 
-for c in sys.argv:
-    if c == "run":
-        run()
-        break 
-    elif c == "test":
-        test()
-        break
-    elif c == "verify":
-        verify()
-        break
+def parseArgs():
+    for c in sys.argv[1:]:
+        c = c.strip().lower()
+        print("\n\n", c)
+        if c == "run":
+            run()
+            return True
+        elif c == "test":
+            test()
+            return True
+        elif c == "verify":
+            verify()
+            return True
+        
+    print("Please kindly run me with an additional argument:\n run (the exhausting factorization),\n test ( with a simple example), or\n verify (the published result)")
+    return False
         
 
-
+parseArgs()
         
         
         
